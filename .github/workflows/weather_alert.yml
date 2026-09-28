@@ -1,0 +1,39 @@
+name: Weather Alert (Wonju Dangu-dong Rain/Snow)
+
+on:
+  schedule:
+    # 평일(월~금) 17:50 KST = 평일 08:50 UTC (KST가 UTC보다 9시간 빠름)
+    # 공휴일은 파이썬 코드가 알아서 걸러서 건너뜁니다.
+    - cron: "50 8 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "수동 실행 모드"
+        required: false
+        default: "check"
+        type: choice
+        options:
+          - check   # 비/눈 예보가 있을 때만 알림
+          - test    # 예보가 없어도 '이상 없음' 테스트 알림 발송
+
+jobs:
+  weather:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 저장소 코드 가져오기
+        uses: actions/checkout@v4
+
+      - name: 파이썬 설치
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 패키지 설치
+        run: pip install requests holidays
+
+      - name: 날씨 확인 및 텔레그램 알림
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          MANUAL_MODE: ${{ github.event.inputs.mode }}
+        run: python weather_alert.py
