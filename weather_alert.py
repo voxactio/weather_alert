@@ -132,14 +132,8 @@ def group_ranges(items):
 
 
 def build_message(start, end, items):
-    # 예보된 종류에 따라 제목 앞 이모지 결정
-    kinds = {k for _, k, _ in items}
-    if kinds == {"눈"}:
-        icon = "❄️"
-    elif kinds == {"비"}:
-        icon = "🌧️"
-    else:
-        icon = "🌨️"  # 비와 눈이 모두 예보된 경우
+    # 비/눈 구분 없이 항상 비·눈 혼합 아이콘 사용
+    icon = "🌨️"
 
     lines = [f"{icon} 눈/비 알림", ""]
 
@@ -148,12 +142,12 @@ def build_message(start, end, items):
         # 끝 시각은 '그 시간대가 끝나는 시각'으로 표시하기 위해 1시간을 더한다.
         end_show = r["end"] + dt.timedelta(hours=1)
         prob = f"(강수확률 최대 {r['prob']}%)" if r["prob"] is not None else ""
-        lines.append(f"· {r['kind']}{prob}")
-        lines.append(f"· {fmt(r['start'])} ~ {fmt(end_show)}")
+        lines.append(f"• {r['kind']}{prob}")
+        lines.append(f"• {fmt(r['start'])} ~ {fmt(end_show)}")
         lines.append("")
 
-    lines.append(f"· 확인 구간 : {fmt(start)} ~ {fmt(end)}")
-    lines.append(f"· 확인 장소 : {PLACE_NAME}")
+    lines.append(f"• 확인 구간 : {fmt(start)} ~ {fmt(end)}")
+    lines.append(f"• 확인 장소 : {PLACE_NAME}")
     return "\n".join(lines)
 
 
